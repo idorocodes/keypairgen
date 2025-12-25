@@ -1,11 +1,11 @@
+
+
 use ed25519_dalek::{
-     Signature, SignatureError, Signer, SigningKey, Verifier, PUBLIC_KEY_LENGTH, SECRET_KEY_LENGTH
+    PUBLIC_KEY_LENGTH, SECRET_KEY_LENGTH, Signature, SignatureError, Signer, SigningKey, Verifier,
+    VerifyingKey, ed25519::Error,
 };
 use hex;
 use rand::rngs::OsRng;
-
-
-
 
 pub fn generate_keypair_withoutseeds() {
     let mut cspring = OsRng;
@@ -36,10 +36,13 @@ pub fn generate_random_verify() {
 
     let message = b"Idorocodes writes rust and builds on solana";
     let signature: Signature = signing_key.sign(message);
-    println!("{}",signature);
+    println!("{}", signature);
 
     println!("Message signed!");
-    println!("Pub key {}",hex::encode(signing_key.verifying_key().as_bytes()));
+    println!(
+        "Pub key {}",
+        hex::encode(signing_key.verifying_key().as_bytes())
+    );
 
     println!("Verifying the message");
 
@@ -51,3 +54,32 @@ pub fn generate_random_verify() {
     }
 }
 
+pub fn verify_message_withsig(pub_key: &str, sign: &str, message: &[u8]) -> Result<(), Error> {
+    let key_input = hex::decode(pub_key);
+
+    let key = match key_input {
+        Ok(x) => x,
+        Err(_) => vec![],
+    };
+
+    let convert_key: [u8; PUBLIC_KEY_LENGTH] = key.try_into().expect("cant convert");
+
+    let pub_key = VerifyingKey::from_bytes(&convert_key);
+
+    let public_key = match pub_key {
+        Ok(x) => x,
+        Err(_) => VerifyingKey::default(),
+    };
+
+    let mut array: [u8; 64] = [0u8; 64];
+    array.copy_from_slice(sign.as_bytes());
+
+    let signature = Signature::from_bytes(&array);
+
+    let result = match public_key.verify(message, &signature) {
+        Ok(_) => println!("Message verified !"),
+        Err(_) => println!("Error  verifying "),
+    };
+
+    Ok(result)
+}
