@@ -17,7 +17,7 @@ pub fn generate_keypair_withoutseeds() {
     println!("Private key: {:}", hex::encode(private_key));
 }
 
-pub fn generate_keypair_withseeds(seeds: [u8; 64]) -> Result<(), SignatureError> {
+pub fn generate_keypair_with_seeds(seeds: [u8; 64]) -> Result<(), SignatureError> {
     let (secret_key, verifying_key) = seeds.split_at(SECRET_KEY_LENGTH);
     let signing_key = SigningKey::try_from(secret_key)?;
     let verifing_key = SigningKey::try_from(verifying_key)?;
@@ -54,7 +54,7 @@ pub fn generate_random_verify() {
     }
 }
 
-pub fn verify_message_withsig(pub_key: &str, sign: &str, message: &[u8]) -> Result<(), Error> {
+pub fn verify_message_with_sig(pub_key: &str, sign: &str, message: &[u8]) -> Result<(), Error> {
     let key_input = hex::decode(pub_key);
 
     let key = match key_input {
